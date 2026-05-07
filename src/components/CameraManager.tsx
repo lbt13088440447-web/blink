@@ -27,35 +27,40 @@ export function CameraManager({ onBlink, onDrowsy, onAwake }: CameraManagerProps
 
     async function start() {
       try {
+        console.log("正在请求摄像头权限...");
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user", width: 320, height: 240 }
+          video: { 
+            facingMode: "user", 
+            width: { ideal: 640 }, 
+            height: { ideal: 480 } 
+          }
         });
         
         if (!videoRef.current) return;
         videoRef.current.srcObject = stream;
         
-        // Wait for video to be ready - check state immediately in case it's already loaded
         await new Promise((resolve) => {
           if (!videoRef.current) return;
           if (videoRef.current.readyState >= 2) {
-            videoRef.current.play();
+            videoRef.current.play().catch(console.warn);
             resolve(true);
           } else {
             videoRef.current.onloadedmetadata = () => {
-              videoRef.current?.play();
+              videoRef.current?.play().catch(console.warn);
               resolve(true);
             };
           }
         });
 
+        console.log("视频流已启动，正在初始化模型...");
         await initializeMediapipe();
         
         if (active) {
           setIsReady(true);
           processVideo();
         }
-
       } catch (err: any) {
+        console.error("摄像头访问或初始化失败:", err);
         if (active) setError(err.message || "Failed to access camera");
       }
     }

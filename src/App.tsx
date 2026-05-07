@@ -73,10 +73,11 @@ export default function App() {
           </header>
 
           <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-            <aside className="w-full md:w-80 flex-shrink-0 border-b md:border-b-0 md:border-r border-[#1A1A1A]/10 p-10 flex flex-col gap-14 bg-[#F8F7F2] overflow-y-auto hidden sm:flex">
+            {/* 移动端改为顶部或底部窄条，或者保持侧边栏但在小屏下也显示核心部分 */}
+            <aside className="w-full md:w-80 flex-shrink-0 border-b md:border-b-0 md:border-r border-[#1A1A1A]/10 p-6 md:p-10 flex flex-col gap-6 md:gap-14 bg-[#F8F7F2] overflow-y-auto z-10">
               <section>
-                <div className="flex justify-between items-end mb-4">
-                  <span className="text-[9px] uppercase tracking-[0.5em] font-black opacity-30">Biometrics</span>
+                <div className="flex justify-between items-end mb-3">
+                  <span className="text-[8px] md:text-[9px] uppercase tracking-[0.5em] font-black opacity-30">Biometrics</span>
                   <span className="text-[9px] font-serif italic opacity-40">Live Feed</span>
                 </div>
                 <CameraManager 
@@ -86,25 +87,24 @@ export default function App() {
                 />
               </section>
 
-              <section className="flex flex-col gap-10">
-                <div>
-                  <h3 className="text-[9px] uppercase tracking-[0.5em] font-black opacity-30 mb-3">Clarity Cycles</h3>
+              <section className="flex flex-row md:flex-col gap-6 md:gap-10 items-center md:items-start">
+                <div className="flex-1">
+                  <h3 className="text-[8px] md:text-[9px] uppercase tracking-[0.5em] font-black opacity-30 mb-2 md:mb-3 whitespace-nowrap">Clarity Cycles</h3>
                   <div className="flex items-baseline gap-2">
-                    <p className="text-6xl font-serif tracking-tighter">{blinkTrigger}</p>
-                    <span className="text-xs font-serif italic text-[#1A1A1A]/30">Completed</span>
+                    <p className="text-3xl md:text-6xl font-serif tracking-tighter">{blinkTrigger}</p>
+                    <span className="text-[10px] font-serif italic text-[#1A1A1A]/30">Completed</span>
                   </div>
-                  <div className="w-full h-px bg-[#1A1A1A]/5 mt-6"></div>
                 </div>
 
-                <div className="p-6 border border-[#1A1A1A]/10 rounded-sm">
-                  <h4 className="text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-4 flex items-center gap-2">
+                <div className="flex-1 p-3 md:p-6 border border-[#1A1A1A]/10 rounded-sm">
+                  <h4 className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-2 md:mb-4 flex items-center gap-2">
                     <span className="w-1 h-1 rounded-full bg-[#1A1A1A]/40"></span>
                     Observer Note
                   </h4>
-                  <p className="text-[12px] leading-relaxed font-serif italic text-[#1A1A1A]/60">
+                  <p className="text-[10px] md:text-[12px] leading-relaxed font-serif italic text-[#1A1A1A]/60">
                     {isDrowsy 
-                      ? "System has transitioned. Please allow the physiological state to normalize before return."
-                      : "The interface reacts to ocular frequency. Focus on the words, then blink to process."}
+                      ? "System has transitioned. Allow the physiological state to normalize."
+                      : "The interface reacts to ocular frequency. Focus, then blink."}
                   </p>
                 </div>
               </section>
