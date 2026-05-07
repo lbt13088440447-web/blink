@@ -130,32 +130,12 @@ export function CameraManager({ onBlink, onDrowsy, onAwake }: CameraManagerProps
   }, [onBlink, onDrowsy, onAwake]);
 
   return (
-    <div className="w-full aspect-video bg-black rounded-sm relative overflow-hidden ring-1 ring-[#1A1A1A]/20">
+    <div className="hidden pointer-events-none">
       <video 
         ref={videoRef} 
-        className="w-full h-full object-cover origin-center -scale-x-100 opacity-60" 
         playsInline 
         muted 
       />
-      {!isReady && !error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1A1A1A] text-white">
-          <div className="w-8 h-8 flex items-center justify-center">
-             <div className="w-6 h-6 border border-white/20 rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      )}
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#1A1A1A] text-white text-[10px] uppercase tracking-widest text-center p-2">
-          无摄像头
-        </div>
-      )}
-      {isReady && (
-        <div className="absolute bottom-2 left-2 flex gap-1 items-end h-4">
-          <div className="w-1 h-3 bg-emerald-400"></div>
-          <div className="w-1 h-4 bg-emerald-400"></div>
-          <div className="w-1 h-2 bg-emerald-400 animate-pulse"></div>
-        </div>
-      )}
     </div>
   );
 }

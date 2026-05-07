@@ -49,84 +49,56 @@ export default function App() {
         </div>
       ) : (
         <>
-          <header className="w-full h-24 border-b border-[#1A1A1A]/10 px-8 md:px-12 flex flex-shrink-0 items-center justify-between bg-[#F8F7F2]">
-            <div className="flex items-center gap-16">
-              <h1 className="font-serif text-4xl italic tracking-tighter group cursor-default">
-                Aether <span className="text-[10px] uppercase tracking-[0.4em] font-sans font-black not-italic opacity-20 ml-2">Mindfulness</span>
-              </h1>
-              <nav className="hidden lg:flex gap-10 text-[9px] uppercase tracking-[0.5em] font-black opacity-30">
-                <a href="#" className="hover:opacity-100 transition-opacity">Journal</a>
-                <a href="#" className="hover:opacity-100 transition-opacity">Insights</a>
-                <a href="#" className="hover:opacity-100 transition-opacity">Archive</a>
-              </nav>
+          <CameraManager 
+            onBlink={handleBlink} 
+            onDrowsy={handleDrowsy} 
+            onAwake={handleAwake} 
+          />
+
+          {/* 品牌定位：左上角 */}
+          <div className="absolute top-10 left-10 md:top-14 md:left-14 z-30 pointer-events-none">
+            <h1 className="font-serif text-2xl md:text-4xl italic tracking-tighter text-[#1A1A1A] opacity-80">
+              Aether
+            </h1>
+            <div className="flex items-center gap-2 mt-2 opacity-20">
+              <div className={`w-1.5 h-1.5 rounded-full ${isDrowsy ? "bg-amber-400" : "bg-emerald-500"}`}></div>
+              <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-black">{isDrowsy ? "Calm Protocol" : "Active Observation"}</span>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col items-end">
-                <span className="text-[9px] uppercase tracking-[0.4em] font-black opacity-20 mb-1">Status Report</span>
-                <span className="text-sm font-serif italic text-[#1A1A1A]/80">{isDrowsy ? "Calm Protocol Active" : "Awake & Observing"}</span>
-              </div>
-              <div className="relative">
-                <div className={`w-3 h-3 rounded-full ${isDrowsy ? "bg-amber-400" : "bg-emerald-500"}`}></div>
-                <div className={`absolute inset-0 w-3 h-3 rounded-full animate-ping ${isDrowsy ? "bg-amber-400" : "bg-emerald-500"} opacity-20`}></div>
-              </div>
-            </div>
-          </header>
+          </div>
 
-          <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-            {/* 移动端改为顶部或底部窄条，或者保持侧边栏但在小屏下也显示核心部分 */}
-            <aside className="w-full md:w-80 flex-shrink-0 border-b md:border-b-0 md:border-r border-[#1A1A1A]/10 p-6 md:p-10 flex flex-col gap-6 md:gap-14 bg-[#F8F7F2] overflow-y-auto z-10">
-              <section>
-                <div className="flex justify-between items-end mb-3">
-                  <span className="text-[8px] md:text-[9px] uppercase tracking-[0.5em] font-black opacity-30">Biometrics</span>
-                  <span className="text-[9px] font-serif italic opacity-40">Live Feed</span>
-                </div>
-                <CameraManager 
-                  onBlink={handleBlink} 
-                  onDrowsy={handleDrowsy} 
-                  onAwake={handleAwake} 
-                />
-              </section>
+          {/* 实时数据：右上角 */}
+          <div className="absolute top-10 right-10 md:top-14 md:right-14 z-30 text-right pointer-events-none">
+            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-black opacity-20 block mb-1">Clarity Cycles</span>
+            <span className="text-2xl md:text-5xl font-serif italic text-[#1A1A1A]/30 tracking-tighter">{blinkTrigger}</span>
+          </div>
 
-              <section className="flex flex-row md:flex-col gap-6 md:gap-10 items-center md:items-start">
-                <div className="flex-1">
-                  <h3 className="text-[8px] md:text-[9px] uppercase tracking-[0.5em] font-black opacity-30 mb-2 md:mb-3 whitespace-nowrap">Clarity Cycles</h3>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-3xl md:text-6xl font-serif tracking-tighter">{blinkTrigger}</p>
-                    <span className="text-[10px] font-serif italic text-[#1A1A1A]/30">Completed</span>
-                  </div>
-                </div>
+          {/* 观察记录：左下角 */}
+          <div className="absolute bottom-10 left-10 md:bottom-14 md:left-14 z-30 max-w-[160px] md:max-w-[240px] pointer-events-none">
+            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-black opacity-10 block mb-2">Observer Note</span>
+            <p className="text-[10px] md:text-[12px] font-serif italic text-[#1A1A1A]/30 leading-relaxed">
+              {isDrowsy 
+                ? "Respiration and biological state being normalized." 
+                : "Active processing based on ocular frequency."}
+            </p>
+          </div>
 
-                <div className="flex-1 p-3 md:p-6 border border-[#1A1A1A]/10 rounded-sm">
-                  <h4 className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-2 md:mb-4 flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-[#1A1A1A]/40"></span>
-                    Observer Note
-                  </h4>
-                  <p className="text-[10px] md:text-[12px] leading-relaxed font-serif italic text-[#1A1A1A]/60">
-                    {isDrowsy 
-                      ? "System has transitioned. Allow the physiological state to normalize."
-                      : "The interface reacts to ocular frequency. Focus, then blink."}
-                  </p>
-                </div>
-              </section>
-            </aside>
+          {/* 模式信息：右下角 */}
+          <div className="absolute bottom-10 right-10 md:bottom-14 md:right-14 z-30 text-right pointer-events-none">
+            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.5em] font-black opacity-10 block mb-1">Status</span>
+            <span className="text-[10px] md:text-[12px] font-serif italic opacity-30 tracking-tight">
+              {isDrowsy ? "Resting" : "Sensing"}
+            </span>
+          </div>
 
-            <div className="flex-1 overflow-hidden relative flex">
-              <AnimatePresence mode="wait">
-                {isDrowsy ? (
-                  <CalmMode key="calm" />
-                ) : (
-                  <ActiveMode key="active" blinkTrigger={blinkTrigger} />
-                )}
-              </AnimatePresence>
-            </div>
+          <main className="flex-1 relative flex w-full h-full overflow-hidden">
+            <AnimatePresence mode="wait">
+              {isDrowsy ? (
+                <CalmMode key="calm" />
+              ) : (
+                <ActiveMode key="active" blinkTrigger={blinkTrigger} />
+              )}
+            </AnimatePresence>
           </main>
-
-          <footer className="h-16 border-t border-[#1A1A1A]/10 px-8 md:px-12 flex flex-shrink-0 items-center justify-between bg-[#F8F7F2]">
-            <div className="flex gap-12 text-[10px] uppercase tracking-widest opacity-60 font-bold">
-              <span>会话进行中</span>
-              <span className="hidden sm:inline">模式: 正念</span>
-            </div>
-          </footer>
         </>
       )}
     </div>

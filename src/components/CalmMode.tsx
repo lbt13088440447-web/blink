@@ -27,10 +27,6 @@ export function CalmMode() {
       transition={{ duration: 2 }}
       className="flex-1 w-full h-full relative bg-[#1A1A1A] flex flex-col items-center justify-center p-8 md:p-12 overflow-hidden"
     >
-      <div className="absolute top-12 left-12 z-20">
-        <span className="text-[10px] uppercase tracking-[0.6em] font-bold text-white/20 whitespace-nowrap">Rest State // 平静协议</span>
-      </div>
-
       <div className="relative z-10 text-center text-[#F8F7F2] max-w-2xl px-6">
         <AnimatePresence mode="wait">
           <motion.h2

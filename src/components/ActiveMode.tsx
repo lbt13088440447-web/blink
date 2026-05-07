@@ -43,21 +43,15 @@ export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
 
   return (
     <section className="flex-1 relative bg-[#F3F2EC] flex flex-col items-center justify-center p-8 md:p-16 h-full w-full overflow-hidden">
-      {/* 顶部元数据：极小字号 + 宽间距 */}
-      <div className="absolute top-12 left-12 flex flex-col gap-1">
-        <span className="text-[9px] uppercase tracking-[0.5em] font-bold text-[#1A1A1A]/30">Location</span>
-        <span className="text-[11px] font-serif italic text-[#1A1A1A]/60">The Clearing / 清空区</span>
-      </div>
-
-      <div className="max-w-3xl w-full flex flex-col items-center">
-        {/* 主标题：大字号 + 紧凑字间距 */}
-        <h2 className="text-5xl md:text-8xl font-serif mb-20 leading-[0.9] tracking-tighter text-[#1A1A1A]">
-          Filter your <br/>
-          <span className="italic pl-12 md:pl-24 block mt-2">ambient <span className="font-sans font-extralight opacity-20 NOT-italic tracking-normal text-4xl ml-4">noise</span></span>
+      <div className="max-w-3xl w-full flex flex-col items-center justify-center">
+        {/* 背景大标题：更淡的配色，作为背景节奏 */}
+        <h2 className="text-6xl md:text-[10rem] font-serif mb-12 leading-[0.8] tracking-tighter text-[#1A1A1A]/5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+          Aether <br/>
+          <span className="italic pl-12 md:pl-24 block">Ambient</span>
         </h2>
 
-        {/* 核心交互区：深思熟虑的留白 */}
-        <div className="relative min-h-[22rem] w-full flex items-center justify-center">
+        {/* 核心交互区 */}
+        <div className="relative min-h-[22rem] w-full flex items-center justify-center z-10">
           <AnimatePresence mode="wait">
             {!isClarified ? (
               <motion.div
@@ -102,19 +96,6 @@ export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
             )}
           </AnimatePresence>
         </div>
-
-        {/* 底部引导：古典排版风格 */}
-        <div className="mt-16 w-full max-w-sm border-t border-[#1A1A1A]/5 pt-8 text-center">
-          <p className="text-[12px] leading-relaxed font-serif italic text-[#1A1A1A]/50">
-            Let the weight of uncertainty drift into the expanse. 
-            <span className="block mt-1 opacity-60">将沉重的思绪飘向远方，在这里找回平静。</span>
-          </p>
-        </div>
-      </div>
-
-      <div className="absolute bottom-12 right-12 text-right hidden md:block">
-        <div className="text-[9px] uppercase tracking-[0.6em] text-[#1A1A1A]/20 font-bold mb-2">Phase Mode</div>
-        <div className="text-2xl font-serif italic tracking-tighter text-[#1A1A1A]/40">Internal Clarity</div>
       </div>
     </section>
   );
