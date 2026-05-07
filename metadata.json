@@ -1,0 +1,8 @@
+{
+  "name": "Mindful Blink",
+  "description": "A mindfulness game that tracks drowsiness via webcam to switch to a calmer state.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
