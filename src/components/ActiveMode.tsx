@@ -3,12 +3,16 @@ import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 
 const THOUGHTS = [
+  { unclear: "我觉得我的感受无关紧要。", clear: "我的感受很重要。" },
+  { unclear: "我拼命想要掌控所有事情。", clear: "管不了的事就随他去吧。" },
+  { unclear: "我还在为过去的事感到后悔。", clear: "过去的事就此翻篇。" },
+  { unclear: "如果未来发生了糟糕的事怎么办？", clear: "还没发生的事别过度焦虑。" },
+  { unclear: "我总是怀疑自己的能力。", clear: "我始终相信我自己。" },
   { unclear: "我有很多事情要做，我永远做不完。", clear: "我将专注于一次只做一件小事。" },
   { unclear: "我做不好这件事。", clear: "我每天都在学习和成长。" },
   { unclear: "其他人都已经想明白了。", clear: "每个人都在自己独特的旅程中。" },
   { unclear: "我在浪费时间。", clear: "休息和反思也是富有成效的。" },
   { unclear: "如果我失败了怎么办？", clear: "失败只是帮助我改进的信息。" },
-  { unclear: "我现在本应该走得更远。", clear: "我正好在我现在处在的位置。" },
   { unclear: "一切都让人不知所措。", clear: "我可以吸入平静，呼出紧张。" }
 ];
 
