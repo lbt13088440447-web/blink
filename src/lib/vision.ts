@@ -13,7 +13,7 @@ export async function initializeMediapipe() {
     );
     
     console.log("正在创建 FaceLandmarker 实例...");
-    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+    const gpuInit = FaceLandmarker.createFromOptions(vision, {
       baseOptions: {
         modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
         delegate: "GPU"
@@ -22,6 +22,12 @@ export async function initializeMediapipe() {
       runningMode,
       numFaces: 1
     });
+
+    const timeout = new Promise<any>((_, reject) => {
+      setTimeout(() => reject(new Error("GPU 初始化超时（Android常见问题）")), 5000);
+    });
+
+    faceLandmarker = await Promise.race([gpuInit, timeout]);
 
     console.log("MediaPipe FaceLandmarker 初始化成功 (GPU)");
   } catch (error) {

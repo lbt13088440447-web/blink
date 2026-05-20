@@ -8,6 +8,8 @@ export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
   const [isDrowsy, setIsDrowsy] = useState(false);
   const [blinkTrigger, setBlinkTrigger] = useState(0);
+  const [isAiReady, setIsAiReady] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   const handleBlink = useCallback(() => {
     // Only trigger blinks if we are awake
@@ -53,6 +55,8 @@ export default function App() {
             onBlink={handleBlink} 
             onDrowsy={handleDrowsy} 
             onAwake={handleAwake} 
+            onReady={() => setIsAiReady(true)}
+            onError={(err) => setCameraError(err)}
           />
 
           {/* 品牌定位：左上角 */}
@@ -91,6 +95,29 @@ export default function App() {
           </div>
 
           <main className="flex-1 relative flex w-full h-full overflow-hidden">
+            {!isAiReady && !cameraError && (
+              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#F3F2EC]">
+                <div className="w-10 h-10 border-2 border-[#1A1A1A]/20 border-t-[#1A1A1A]/80 rounded-full animate-spin mb-8"></div>
+                <p className="font-serif italic text-lg text-[#1A1A1A]/80">Loading Neural Models...</p>
+                <p className="text-[9px] uppercase tracking-[0.4em] font-black opacity-40 mt-4 text-center max-w-xs leading-relaxed">
+                  Initializing Optical Sensors<br/>This may take a moment
+                </p>
+              </div>
+            )}
+            
+            {cameraError && (
+              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#F3F2EC] px-8 text-center">
+                <p className="font-serif italic text-xl text-[#1A1A1A]/80 mb-4">Sensor Error</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-40 mb-8 max-w-sm">{cameraError}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-8 py-3 bg-[#1A1A1A] text-white rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-black transition-colors"
+                >
+                  Reload Experience
+                </button>
+              </div>
+            )}
+
             <AnimatePresence mode="wait">
               {isDrowsy ? (
                 <CalmMode key="calm" />

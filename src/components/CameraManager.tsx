@@ -11,9 +11,11 @@ interface CameraManagerProps {
   onBlink: () => void;
   onDrowsy: () => void;
   onAwake: () => void;
+  onReady?: () => void;
+  onError?: (err: string) => void;
 }
 
-export function CameraManager({ onBlink, onDrowsy, onAwake }: CameraManagerProps) {
+export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: CameraManagerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,11 +59,15 @@ export function CameraManager({ onBlink, onDrowsy, onAwake }: CameraManagerProps
         
         if (active) {
           setIsReady(true);
+          onReady?.();
           processVideo();
         }
       } catch (err: any) {
         console.error("摄像头访问或初始化失败:", err);
-        if (active) setError(err.message || "Failed to access camera");
+        if (active) {
+           setError(err.message || "Failed to access camera");
+           onError?.(err.message || "Failed to access camera");
+        }
       }
     }
 
@@ -130,11 +136,12 @@ export function CameraManager({ onBlink, onDrowsy, onAwake }: CameraManagerProps
   }, [onBlink, onDrowsy, onAwake]);
 
   return (
-    <div className="hidden pointer-events-none">
+    <div className="fixed top-0 left-0 w-px h-px opacity-0 pointer-events-none select-none z-[-1] overflow-hidden">
       <video 
         ref={videoRef} 
         playsInline 
         muted 
+        autoPlay
       />
     </div>
   );
