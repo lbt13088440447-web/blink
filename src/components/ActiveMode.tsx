@@ -21,7 +21,19 @@ const THOUGHTS = [
   { unclear: "杂乱的念头和情绪盖过了我所有的理智。", clear: "把你的觉察想象成广阔的蓝天，而情绪和杂念只是偶尔飘过的乌云。乌云会散去，蓝天永远都在。" },
   { unclear: "我被自己的愤怒与悲伤牢牢控制着，无法挣脱。", clear: "觉察是最好的疗愈。当你只是看着自己的愤怒或悲伤时，它就开始失去控制你的力量。" },
   { unclear: "我又走神了，我总是做不好，对自己很失望。", clear: "每一次你发现自己走神，并温和地把注意力拉回呼吸上，这都是一次完美的练习。别对自己太苛刻。" },
-  { unclear: "四周太喧闹，我找不到可以栖息的安宁。", clear: "“仅仅是听到，隐约听到，在大海两次潮汐之间的寂静里。” —— 杰克·康菲尔德" }
+  { unclear: "四周太喧闹，我找不到可以栖息的安宁。", clear: "“仅仅是听到，隐约听到，在大海两次潮汐之间的寂静里。” —— 杰克·康菲尔德" },
+  { unclear: "我总是想要取悦所有人，这让我筋疲力尽。", clear: "我无法掌控别人的想法，我只需要对自己负责。" },
+  { unclear: "我感觉我的生活偏离了预定的轨道。", clear: "生活没有固定的轨道，我走的每一步都在创造我自己的道路。" },
+  { unclear: "我总是在比较自己与他人的生活。", clear: "比较是偷走快乐的贼，我只和昨天的自己比较。" },
+  { unclear: "我不应该感到悲伤或焦虑，我要藏起来。", clear: "所有的情绪都有被看见的权利，我允许自己感受当下的一切。" },
+  { unclear: "无论我怎么努力，似乎永远都不够好。", clear: "“足够好”是一种状态，而不是一个终点。此刻的我，就已经足够。" },
+  { unclear: "我无法原谅自己曾经犯下的错误。", clear: "原谅自己是治愈的开始。过去的错误并不定义现在的我。" },
+  { unclear: "未来充满了太多让我恐慌的未知。", clear: "不确定性是生命的常态，我选择在不确定性中拥抱开放的可能性。" },
+  { unclear: "在这个世界上，我觉得自己毫无价值。", clear: "每一个生命都有其内在的价值，我的存在本身就是意义。" },
+  { unclear: "我需要被别人认可，才能证明我的价值。", clear: "真正的认可源于内心，我给自己的爱无需向外部世界证明。" },
+  { unclear: "有些不好的事情，我永远也忘不了。", clear: "我不需要强迫自己遗忘，我只需学会与它们和平共处。" },
+  { unclear: "要是当初做不同的选择就好了。", clear: "我已经基于当时所知，做出了最好的选择。接纳过去也是放过自己。" },
+  { unclear: "我很孤单，好像没有人能理解我。", clear: "孤独也是一种完整的体验，我正学着享受与自己独处的宁静。" }
 ];
 
 interface ActiveModeProps {
@@ -30,7 +42,7 @@ interface ActiveModeProps {
 }
 
 export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * THOUGHTS.length));
   const [isClarified, setIsClarified] = useState(false);
 
   useEffect(() => {
@@ -46,7 +58,13 @@ export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
         });
       } else {
         setIsClarified(false);
-        setCurrentIndex((prev) => (prev + 1) % THOUGHTS.length);
+        setCurrentIndex((prev) => {
+          let next = Math.floor(Math.random() * THOUGHTS.length);
+          while (next === prev) {
+            next = Math.floor(Math.random() * THOUGHTS.length);
+          }
+          return next;
+        });
       }
     }
   }, [blinkTrigger]);

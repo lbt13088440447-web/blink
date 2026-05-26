@@ -65,8 +65,18 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
       } catch (err: any) {
         console.error("摄像头访问或初始化失败:", err);
         if (active) {
-           setError(err.message || "Failed to access camera");
-           onError?.(err.message || "Failed to access camera");
+           let errorMsg = err.message || "Failed to access camera";
+           
+           if (errorMsg.includes("Permission") || err.name === "NotAllowedError") {
+             errorMsg = "无法访问相机权限 (Permission denied)。\n\n如果在微信等应用内打开，请点击右上角在【系统浏览器】(Safari/Chrome) 中打开以获取授权。";
+           } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+             errorMsg = "未检测到可用摄像头。请检查设备相机。";
+           } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+             errorMsg = "摄像头正被其他应用占用，请关闭后重试。";
+           }
+
+           setError(errorMsg);
+           onError?.(errorMsg);
         }
       }
     }
