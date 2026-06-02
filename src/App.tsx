@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { CameraManager } from "./components/CameraManager";
 import { ActiveMode } from "./components/ActiveMode";
 import { CalmMode } from "./components/CalmMode";
@@ -10,6 +10,56 @@ export default function App() {
   const [blinkTrigger, setBlinkTrigger] = useState(0);
   const [isAiReady, setIsAiReady] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+
+  const touchStartX = useRef<number | null>(null);
+  const touchCurrentX = useRef<number | null>(null);
+  const touchSide = useRef<'left' | 'right' | null>(null);
+  const [swipeProgress, setSwipeProgress] = useState(0);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    // Detect swipes starting near the left edge (< 60px) or right edge (> window.innerWidth - 60px)
+    if (clientX < 60) {
+      touchStartX.current = clientX;
+      touchCurrentX.current = clientX;
+      touchSide.current = 'left';
+      setSwipeProgress(0);
+    } else if (clientX > window.innerWidth - 60) {
+      touchStartX.current = clientX;
+      touchCurrentX.current = clientX;
+      touchSide.current = 'right';
+      setSwipeProgress(0);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (touchStartX.current === null || touchSide.current === null) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    touchCurrentX.current = clientX;
+    
+    if (touchSide.current === 'left') {
+      const diff = clientX - touchStartX.current;
+      if (diff > 0) setSwipeProgress(Math.min(diff / 100, 1));
+    } else {
+      const diff = touchStartX.current - clientX;
+      if (diff > 0) setSwipeProgress(Math.min(diff / 100, 1));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX.current !== null && touchCurrentX.current !== null && touchSide.current !== null) {
+      const diff = touchSide.current === 'left' 
+        ? touchCurrentX.current - touchStartX.current
+        : touchStartX.current - touchCurrentX.current;
+      if (diff > 60) {
+        setHasStarted(false);
+      }
+    }
+    touchStartX.current = null;
+    touchCurrentX.current = null;
+    touchSide.current = null;
+    setSwipeProgress(0);
+  }, []);
 
   const handleBlink = useCallback(() => {
     // Only trigger blinks if we are awake
@@ -114,7 +164,68 @@ export default function App() {
           </motion.div>
         </div>
       ) : (
-        <>
+        <div 
+          className="flex-1 w-full h-full relative"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleTouchStart}
+          onMouseMove={handleTouchMove}
+          onMouseUp={handleTouchEnd}
+          onMouseLeave={handleTouchEnd}
+        >
+          {/* 左侧返回提示 */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-50 pointer-events-none flex items-center h-48">
+            <motion.div 
+              animate={{ 
+                x: swipeProgress > 0 && touchSide.current === 'left' ? swipeProgress * 30 : [0, 4, 0], 
+                opacity: swipeProgress > 0 && touchSide.current === 'left' ? 0.8 : (touchSide.current === 'right' ? 0 : [0.1, 0.4, 0.1])
+              }}
+              transition={swipeProgress > 0 ? { duration: 0 } : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              className="flex items-center ml-1"
+            >
+              <div className="w-[3px] h-12 bg-[#1A1A1A] rounded-full drop-shadow-md"></div>
+              {swipeProgress > 0 && touchSide.current === 'left' && (
+                <div className="bg-[#1A1A1A] text-white p-1.5 rounded-full ml-3 drop-shadow-lg" style={{ scale: Math.min(1, 0.5 + swipeProgress) }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m15 18-6-6 6-6"/>
+                  </svg>
+                </div>
+              )}
+              {(!swipeProgress || touchSide.current !== 'left') && (
+                <span className="text-[8px] font-black tracking-[0.3em] text-[#1A1A1A] ml-2 opacity-60" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
+                  滑动返回
+                </span>
+              )}
+            </motion.div>
+          </div>
+
+          {/* 右侧返回提示 */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 z-50 pointer-events-none flex items-center h-48">
+            <motion.div 
+              animate={{ 
+                x: swipeProgress > 0 && touchSide.current === 'right' ? -swipeProgress * 30 : [0, -4, 0], 
+                opacity: swipeProgress > 0 && touchSide.current === 'right' ? 0.8 : (touchSide.current === 'left' ? 0 : [0.1, 0.4, 0.1])
+              }}
+              transition={swipeProgress > 0 ? { duration: 0 } : { duration: 2.5, right: 0, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              className="flex items-center mr-1 flex-row-reverse"
+            >
+              <div className="w-[3px] h-12 bg-[#1A1A1A] rounded-full drop-shadow-md"></div>
+              {swipeProgress > 0 && touchSide.current === 'right' && (
+                <div className="bg-[#1A1A1A] text-white p-1.5 rounded-full mr-3 drop-shadow-lg" style={{ scale: Math.min(1, 0.5 + swipeProgress) }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m9 18 6-6-6-6"/>
+                  </svg>
+                </div>
+              )}
+              {(!swipeProgress || touchSide.current !== 'right') && (
+                <span className="text-[8px] font-black tracking-[0.3em] text-[#1A1A1A] mr-2 opacity-60" style={{ writingMode: "vertical-rl" }}>
+                  滑动返回
+                </span>
+              )}
+            </motion.div>
+          </div>
+
           <CameraManager 
             onBlink={handleBlink} 
             onDrowsy={handleDrowsy} 
@@ -162,22 +273,22 @@ export default function App() {
             {!isAiReady && !cameraError && (
               <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#F3F2EC]">
                 <div className="w-10 h-10 border-2 border-[#1A1A1A]/20 border-t-[#1A1A1A]/80 rounded-full animate-spin mb-8"></div>
-                <p className="font-serif italic text-lg text-[#1A1A1A]/80">Loading Neural Models...</p>
-                <p className="text-[9px] uppercase tracking-[0.4em] font-black opacity-40 mt-4 text-center max-w-xs leading-relaxed">
-                  Initializing Optical Sensors<br/>This may take a moment
+                <p className="font-serif italic text-xl text-[#1A1A1A]/80">正在唤醒模型...</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-40 mt-4 text-center max-w-xs leading-relaxed">
+                  初始化光学传感器<br/>这可能需要几秒钟
                 </p>
               </div>
             )}
             
             {cameraError && (
               <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#F3F2EC] px-8 text-center">
-                <p className="font-serif italic text-xl text-[#1A1A1A]/80 mb-4">Sensor Error</p>
+                <p className="font-serif italic text-xl text-[#1A1A1A]/80 mb-4">传感器初始化失败</p>
                 <p className="text-[10px] tracking-[0.1em] font-bold opacity-60 mb-8 max-w-sm whitespace-pre-wrap text-left bg-black/5 p-4 rounded-md">{cameraError}</p>
                 <button 
                   onClick={() => window.location.reload()}
                   className="px-8 py-3 bg-[#1A1A1A] text-white rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-black transition-colors"
                 >
-                  Reload Experience
+                  重 新 加 载 体验
                 </button>
               </div>
             )}
@@ -190,7 +301,7 @@ export default function App() {
               )}
             </AnimatePresence>
           </main>
-        </>
+        </div>
       )}
     </div>
   );
