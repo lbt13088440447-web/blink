@@ -94,10 +94,20 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
       }
     }
 
+    let lastProcessTime = 0;
+
     async function processVideo() {
       if (!videoRef.current || !active) return;
       
       try {
+        const nowMs = performance.now();
+        // Throttle inference to ~15 FPS (every ~66ms) to save massive CPU/GPU load on mobile
+        if (nowMs - lastProcessTime < 66) {
+          if (active) requestAnimationFrameId = requestAnimationFrame(processVideo);
+          return;
+        }
+        lastProcessTime = nowMs;
+
         const landmarker = getFaceLandmarker();
         if (landmarker && videoRef.current.readyState >= 2) {
           const results = landmarker.detectForVideo(videoRef.current, performance.now());

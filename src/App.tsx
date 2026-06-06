@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { audioService } from "./lib/audio";
 import { THOUGHTS } from "./data";
 import { Sun, Moon } from "lucide-react";
+import { initializeMediapipe } from "./lib/vision";
 
 export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
@@ -14,6 +15,11 @@ export default function App() {
   const [isAiReady, setIsAiReady] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isManualMode, setIsManualMode] = useState(false);
+
+  useEffect(() => {
+    // Background preload of the AI model so it's fast when user clicks start
+    initializeMediapipe().catch(() => {});
+  }, []);
 
   const [theme, setTheme] = useState<'cream' | 'midnight'>(() => {
     try {

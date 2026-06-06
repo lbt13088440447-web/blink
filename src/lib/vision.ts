@@ -24,16 +24,14 @@ export async function initializeMediapipe() {
         delegate: delegate
       },
       outputFaceBlendshapes: true,
+      minFaceDetectionConfidence: 0.5,
+      minFacePresenceConfidence: 0.5,
+      minTrackingConfidence: 0.5,
       runningMode,
       numFaces: 1
     });
 
-    const timeoutMs = isMobile ? 10000 : 5000;
-    const timeout = new Promise<any>((_, reject) => {
-      setTimeout(() => reject(new Error(`${delegate} 初始化超时`)), timeoutMs);
-    });
-
-    faceLandmarker = await Promise.race([initPromise, timeout]);
+    faceLandmarker = await initPromise;
 
     console.log(`MediaPipe FaceLandmarker 初始化成功 (${delegate})`);
   } catch (error) {
