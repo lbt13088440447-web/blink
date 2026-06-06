@@ -1,81 +1,89 @@
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
-
-const THOUGHTS = [
-  { unclear: "我觉得我的感受无关紧要。", clear: "我的感受很重要。" },
-  { unclear: "我拼命想要掌控所有事情。", clear: "管不了的事就随他去吧。" },
-  { unclear: "我还在为过去的事感到后悔。", clear: "过去的事就此翻篇。" },
-  { unclear: "如果未来发生了糟糕的事怎么办？", clear: "还没发生的事别过度焦虑。" },
-  { unclear: "我总是怀疑自己的能力。", clear: "我始终相信我自己。" },
-  { unclear: "我有很多事情要做，我永远做不完。", clear: "我将专注于一次只做一件小事。" },
-  { unclear: "我做不好这件事。", clear: "我每天都在学习和成长。" },
-  { unclear: "其他人都已经想明白了。", clear: "每个人都在自己独特的旅程中。" },
-  { unclear: "我在浪费时间。", clear: "休息和反思也是富有成效的。" },
-  { unclear: "如果我失败了怎么办？", clear: "失败只是帮助我改进的信息。" },
-  { unclear: "一切都让人不知所措。", clear: "我可以吸入平静，呼出紧张。" },
-  { unclear: "我的思绪总是飘忽不定，不在当下。", clear: "你的思想可以存在于过去或未来，但你的身体永远只在当下。" },
-  { unclear: "我总是为过去懊悔，为未来担忧。", clear: "过去已经过去，未来尚未发生。你唯一真正拥有的，只有此时此刻。" },
-  { unclear: "生活中的困难排山倒海，烦恼挥之不去。", clear: "“你无法阻止波浪，但你可以学会冲浪。” —— 乔恩·卡巴金" },
-  { unclear: "我感到痛苦，因为我不接受现在发生的事。", clear: "痛苦产生于抗拒。当你不再试图改变现状，接纳就会带来平静。" },
-  { unclear: "杂乱的念头和情绪盖过了我所有的理智。", clear: "把你的觉察想象成广阔的蓝天，而情绪和杂念只是偶尔飘过的乌云。乌云会散去，蓝天永远都在。" },
-  { unclear: "我被自己的愤怒与悲伤牢牢控制着，无法挣脱。", clear: "觉察是最好的疗愈。当你只是看着自己的愤怒或悲伤时，它就开始失去控制你的力量。" },
-  { unclear: "我又走神了，我总是做不好，对自己很失望。", clear: "每一次你发现自己走神，并温和地把注意力拉回呼吸上，这都是一次完美的练习。别对自己太苛刻。" },
-  { unclear: "四周太喧闹，我找不到可以栖息的安宁。", clear: "“仅仅是听到，隐约听到，在大海两次潮汐之间的寂静里。” —— 杰克·康菲尔德" },
-  { unclear: "我总是想要取悦所有人，这让我筋疲力尽。", clear: "我无法掌控别人的想法，我只需要对自己负责。" },
-  { unclear: "我感觉我的生活偏离了预定的轨道。", clear: "生活没有固定的轨道，我走的每一步都在创造我自己的道路。" },
-  { unclear: "我总是在比较自己与他人的生活。", clear: "比较是偷走快乐的贼，我只和昨天的自己比较。" },
-  { unclear: "我不应该感到悲伤或焦虑，我要藏起来。", clear: "所有的情绪都有被看见的权利，我允许自己感受当下的一切。" },
-  { unclear: "无论我怎么努力，似乎永远都不够好。", clear: "“足够好”是一种状态，而不是一个终点。此刻的我，就已经足够。" },
-  { unclear: "我无法原谅自己曾经犯下的错误。", clear: "原谅自己是治愈的开始。过去的错误并不定义现在的我。" },
-  { unclear: "未来充满了太多让我恐慌的未知。", clear: "不确定性是生命的常态，我选择在不确定性中拥抱开放的可能性。" },
-  { unclear: "在这个世界上，我觉得自己毫无价值。", clear: "每一个生命都有其内在的价值，我的存在本身就是意义。" },
-  { unclear: "我需要被别人认可，才能证明我的价值。", clear: "真正的认可源于内心，我给自己的爱无需向外部世界证明。" },
-  { unclear: "有些不好的事情，我永远也忘不了。", clear: "我不需要强迫自己遗忘，我只需学会与它们和平共处。" },
-  { unclear: "要是当初做不同的选择就好了。", clear: "我已经基于当时所知，做出了最好的选择。接纳过去也是放过自己。" },
-  { unclear: "我很孤单，好像没有人能理解我。", clear: "孤独也是一种完整的体验，我正学着享受与自己独处的宁静。" }
-];
+import { audioService } from "../lib/audio";
+import { THOUGHTS } from "../data";
+import { Heart, X, Trash2, Sparkles } from "lucide-react";
 
 interface ActiveModeProps {
+  key?: any;
   blinkTrigger: number;
-  key?: string;
+  currentIndex: number;
+  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
+  isClarified: boolean;
+  setIsClarified: React.Dispatch<React.SetStateAction<boolean>>;
+  savedIndices: number[];
+  setSavedIndices: React.Dispatch<React.SetStateAction<number[]>>;
+  theme?: 'cream' | 'midnight';
 }
 
-export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
-  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * THOUGHTS.length));
-  const [isClarified, setIsClarified] = useState(false);
+export function ActiveMode({ 
+  blinkTrigger, 
+  currentIndex, 
+  setCurrentIndex, 
+  isClarified, 
+  setIsClarified, 
+  savedIndices, 
+  setSavedIndices,
+  theme = 'cream'
+}: ActiveModeProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const lastBlinkTriggerRef = useRef(blinkTrigger);
 
   useEffect(() => {
-    if (blinkTrigger > 0) {
-      if (!isClarified) {
-        setIsClarified(true);
-        confetti({
-          particleCount: 20,
-          spread: 40,
-          colors: ['#1A1A1A', '#555555', '#DDDDDD'],
-          origin: { y: 0.6 },
-          disableForReducedMotion: true
-        });
-      } else {
-        setIsClarified(false);
-        setCurrentIndex((prev) => {
-          let next = Math.floor(Math.random() * THOUGHTS.length);
-          while (next === prev) {
-            next = Math.floor(Math.random() * THOUGHTS.length);
+    if (blinkTrigger !== lastBlinkTriggerRef.current) {
+      lastBlinkTriggerRef.current = blinkTrigger;
+
+      if (blinkTrigger > 0) {
+        setIsClarified((prevClarified) => {
+          if (!prevClarified) {
+            audioService.playShatter();
+            confetti({
+              particleCount: 20,
+              spread: 40,
+              colors: ['#1A1A1A', '#555555', '#DDDDDD'],
+              origin: { y: 0.6 },
+              disableForReducedMotion: true
+            });
+            return true;
+          } else {
+            audioService.playShatter();
+            setCurrentIndex((prev) => {
+              let next = Math.floor(Math.random() * THOUGHTS.length);
+              while (next === prev) {
+                next = Math.floor(Math.random() * THOUGHTS.length);
+              }
+              return next;
+            });
+            return false;
           }
-          return next;
         });
       }
     }
-  }, [blinkTrigger]);
+  }, [blinkTrigger, setCurrentIndex, setIsClarified]);
+
+  const removeSaved = (idxToRemove: number) => {
+    setSavedIndices((prev) => {
+      const next = prev.filter(i => i !== idxToRemove);
+      try {
+        localStorage.setItem("aether_saved_thoughts", JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
 
   const currentThought = THOUGHTS[currentIndex];
 
   return (
-    <section className="flex-1 relative bg-[#F3F2EC] flex flex-col items-center justify-center p-8 md:p-16 h-full w-full overflow-hidden">
+    <section className={`flex-1 relative flex flex-col items-center justify-center p-8 md:p-16 h-full w-full overflow-hidden transition-colors duration-1000 ${
+      theme === "midnight" ? "bg-[#060C1B]" : "bg-[#F3F2EC]"
+    }`}>
       <div className="max-w-3xl w-full flex flex-col items-center justify-center">
         {/* 背景大标题：更淡的配色，作为背景节奏 */}
-        <h2 className="text-6xl md:text-[10rem] font-serif mb-12 leading-[0.8] tracking-tighter text-[#1A1A1A]/5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+        <h2 className={`text-6xl md:text-[10rem] font-serif mb-12 leading-[0.8] tracking-tighter absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none transition-colors duration-1000 ${
+          theme === "midnight" ? "text-blue-500/5 animate-pulse" : "text-[#1A1A1A]/5"
+        }`}>
           Aether <br/>
           <span className="italic pl-12 md:pl-24 block">Ambient</span>
         </h2>
@@ -90,17 +98,23 @@ export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, scale: 0.96, filter: "blur(12px)" }}
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="max-w-xl"
+                className="max-w-xl text-center"
               >
                 <div className="mb-6 flex justify-center">
-                   <div className="w-px h-12 bg-[#1A1A1A]/10"></div>
+                   <div className={`w-px h-12 transition-colors duration-1000 ${
+                     theme === "midnight" ? "bg-blue-300/15" : "bg-[#1A1A1A]/10"
+                   }`}></div>
                 </div>
-                <h1 className="text-3xl md:text-5xl font-serif italic text-[#1A1A1A] leading-normal px-4">
-                  “{currentThought.unclear}”
+                <h1 className={`text-3xl md:text-5xl font-serif italic leading-normal px-4 transition-colors duration-1000 ${
+                  theme === "midnight" ? "text-blue-100" : "text-[#1A1A1A]"
+                }`}>
+                  “{currentThought?.unclear}”
                 </h1>
                 <div className="mt-10">
-                  <p className="text-[#1A1A1A]/40 animate-pulse text-[9px] uppercase tracking-[0.4em] font-black">
-                    Blink to Clarify / 眨眼以澄清
+                  <p className={`animate-pulse text-[9px] uppercase tracking-[0.4em] font-black transition-colors duration-1000 ${
+                    theme === "midnight" ? "text-cyan-400/50" : "text-[#1A1A1A]/40"
+                  }`}>
+                    Double Blink to Clarify / 快速眨眼两次以澄清
                   </p>
                 </div>
               </motion.div>
@@ -111,15 +125,21 @@ export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
                 transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                className="max-w-xl"
+                className="max-w-xl text-center"
               >
-                <h1 className="text-3xl md:text-5xl font-serif text-[#1A1A1A] leading-normal px-4">
-                  “{currentThought.clear}”
+                <h1 className={`text-3xl md:text-5xl font-serif leading-normal px-4 transition-colors duration-1000 ${
+                  theme === "midnight" ? "text-[#F8F7F2]" : "text-[#1A1A1A]"
+                }`}>
+                  “{currentThought?.clear}”
                 </h1>
                 <div className="mt-10 flex flex-col items-center">
-                  <div className="w-8 h-px bg-emerald-500/40 mb-4"></div>
-                  <p className="text-emerald-600/60 animate-pulse text-[9px] uppercase tracking-[0.4em] font-black">
-                    Blink to Release / 眨眼以释放
+                  <div className={`w-8 h-px mb-4 transition-colors duration-1000 ${
+                    theme === "midnight" ? "bg-cyan-500/45" : "bg-emerald-500/40"
+                  }`}></div>
+                  <p className={`animate-pulse text-[9px] uppercase tracking-[0.4em] font-black transition-colors duration-1000 ${
+                    theme === "midnight" ? "text-[#38BDF8]" : "text-emerald-600/60"
+                  }`}>
+                    Double Blink to Release / 快速眨眼两次以释放
                   </p>
                 </div>
               </motion.div>
@@ -127,6 +147,154 @@ export function ActiveMode({ blinkTrigger }: ActiveModeProps) {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Toggle Favorites Drawer (Circular Button under the Theme Switch) */}
+      <button
+        onClick={() => setIsDrawerOpen(true)}
+        className={`fixed top-20 right-4 md:top-[6.25rem] md:right-6 z-50 w-9 h-9 rounded-full cursor-pointer flex items-center justify-center transition-all duration-500 shadow-xl border ${
+          theme === "midnight"
+            ? "bg-[#0B1528]/95 border-[#38BDF8]/25 text-rose-300/65 hover:text-rose-200/90 hover:scale-105 hover:bg-[#0E1B35] shadow-[0_0_20px_rgba(244,63,94,0.08)]"
+            : "bg-white/95 border-[#1A1A1A]/10 text-rose-400/80 hover:bg-white hover:scale-105 shadow-[0_4px_15px_rgba(0,0,0,0.04)]"
+        } active:scale-95`}
+        title={`名句收藏夹 (${savedIndices.length})`}
+      >
+        <div className="relative">
+          <Heart 
+            className={`w-4 h-4 transition-all duration-300 ${
+              savedIndices.length > 0 
+                ? theme === "midnight"
+                  ? 'fill-rose-400/35 text-rose-400/60 scale-105' 
+                  : 'fill-rose-300/70 text-rose-400/80 scale-105'
+                : 'text-current fill-none scale-100'
+            }`} 
+          />
+          {savedIndices.length > 0 && (
+            <span className={`absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 px-0.5 text-white text-[7.5px] font-black rounded-full flex items-center justify-center shadow-sm animate-pulse ${
+              theme === "midnight" ? "bg-rose-400/50" : "bg-rose-300/85 text-rose-900"
+            }`}>
+              {savedIndices.length}
+            </span>
+          )}
+        </div>
+      </button>
+
+      {/* Favorites Drawer Panel */}
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm flex justify-end"
+            onClick={() => setIsDrawerOpen(false)}
+          >
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 220 }}
+              className={`w-full max-w-md h-full shadow-2xl flex flex-col p-8 md:p-10 transition-colors duration-1000 ${
+                theme === "midnight" 
+                  ? "bg-[#090E20]/95 text-slate-100 border-l border-blue-950/40" 
+                  : "bg-[#EAE8E3] text-[#1A1A1A]"
+              }`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={`flex justify-between items-center mb-8 border-b pb-4 transition-colors duration-1000 ${
+                theme === "midnight" ? "border-blue-950/60" : "border-[#1A1A1A]/10"
+              }`}>
+                <div>
+                  <h3 className="font-serif text-xl italic tracking-tight font-black">
+                    心海 · 智言收藏
+                  </h3>
+                  <p className={`text-[9px] uppercase tracking-widest font-sans mt-1 transition-colors duration-1000 ${
+                    theme === "midnight" ? "text-indigo-300" : "text-[#1A1A1A]/50"
+                  }`}>
+                    INWARD REPOSITORY ({savedIndices.length})
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setIsDrawerOpen(false)}
+                  className={`p-2 transition-colors cursor-pointer rounded-full ${
+                    theme === "midnight" ? "hover:bg-blue-900/40 text-blue-300" : "hover:bg-[#1A1A1A]/5 text-[#1A1A1A]"
+                  }`}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Saved Quotes List */}
+              <div className="flex-1 overflow-y-auto space-y-5 pr-2 -mr-2 select-text scrollbar-thin">
+                {savedIndices.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center opacity-60 py-20 px-4 animate-fade-in">
+                    <Heart className={`w-8 h-8 mb-4 stroke-[1.5] ${
+                      theme === "midnight" ? "text-indigo-400/40" : "text-[#1A1A1A]/20"
+                    }`} />
+                    <p className="font-serif italic text-base">心海空明，尚无铭刻</p>
+                    <p className="text-[10px] leading-relaxed max-w-xs mt-3 opacity-75">
+                      提示：当看到引起共鸣的句子时（例如澄清后的智言），只需闭合双眼长于两秒（进入平静模式），即可将其自动收藏、铭记于胸中。
+                    </p>
+                  </div>
+                ) : (
+                  savedIndices.map((idx) => {
+                    const thought = THOUGHTS[idx];
+                    if (!thought) return null;
+                    return (
+                      <div 
+                        key={idx}
+                        className={`group relative p-5 border transition-all flex flex-col gap-3 rounded-none ${
+                          theme === "midnight" 
+                            ? "bg-[#0F172A] border-blue-950 hover:border-sky-500/30 text-slate-100" 
+                            : "bg-[#F3F2EC] border-[#1A1A1A]/5 hover:border-[#1A1A1A]/15 text-[#1A1A1A]"
+                        }`}
+                      >
+                        <p className="font-serif text-[15px] leading-relaxed text-left">
+                          “{thought.clear}”
+                        </p>
+                        
+                        <div className={`flex justify-between items-center mt-2 border-t pt-3 transition-colors duration-1000 ${
+                          theme === "midnight" ? "border-blue-950" : "border-[#1A1A1A]/5"
+                        }`}>
+                          <button
+                            onClick={() => {
+                              setCurrentIndex(idx);
+                              setIsClarified(true);
+                              setIsDrawerOpen(false);
+                            }}
+                            className={`text-[9px] uppercase tracking-widest font-black transition-colors flex items-center gap-1.5 cursor-pointer ${
+                              theme === "midnight" ? "text-sky-450 hover:text-sky-300" : "text-[#1A1A1A]/70 hover:text-[#1A1A1A]"
+                            }`}
+                          >
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            当前默默体悟
+                          </button>
+                          
+                          <button
+                            onClick={() => removeSaved(idx)}
+                            className={`transition-colors cursor-pointer p-1 rounded ${
+                              theme === "midnight" ? "text-slate-500 hover:text-rose-450" : "text-[#1A1A1A]/30 hover:text-red-600"
+                            }`}
+                            title="从收藏移除"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className={`mt-8 pt-4 border-t text-center text-[9px] uppercase tracking-[0.2em] opacity-40 leading-relaxed font-black transition-colors duration-1000 ${
+                theme === "midnight" ? "border-blue-950 text-indigo-400" : "border-[#1A1A1A]/10 text-[#1A1A1A]"
+              }`}>
+                闭阖双眸，涤荡尘埃<br/>
+                将智者高论化作今日行动之锚
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

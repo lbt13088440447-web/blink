@@ -53,7 +53,7 @@ export async function initializeMediapipe() {
       });
       console.log("MediaPipe FaceLandmarker 回退初始化成功 (CPU)");
     } catch (innerError) {
-      console.error("MediaPipe 完全初始化失败:", innerError);
+      console.warn("MediaPipe 完全初始化未成功:", innerError);
       throw innerError;
     }
   }

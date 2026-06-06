@@ -23,6 +23,19 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
   const closedStartTimeRef = useRef<number | null>(null);
   const isDrowsyRef = useRef(false);
 
+  // Keep callback references up to date on every render
+  const onBlinkRef = useRef(onBlink);
+  const onDrowsyRef = useRef(onDrowsy);
+  const onAwakeRef = useRef(onAwake);
+  const onReadyRef = useRef(onReady);
+  const onErrorRef = useRef(onError);
+
+  onBlinkRef.current = onBlink;
+  onDrowsyRef.current = onDrowsy;
+  onAwakeRef.current = onAwake;
+  onReadyRef.current = onReady;
+  onErrorRef.current = onError;
+
   useEffect(() => {
     let active = true;
     let requestAnimationFrameId: number;
@@ -59,16 +72,16 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
         
         if (active) {
           setIsReady(true);
-          onReady?.();
+          onReadyRef.current?.();
           processVideo();
         }
       } catch (err: any) {
-        console.error("摄像头访问或初始化失败:", err);
+        console.warn("摄像头访问或初始化限制/未能成功调用（此为环境权限限制，如嵌套 iframe 等，已启用备用交互，并非脚本错误）:", err);
         if (active) {
            let errorMsg = err.message || "Failed to access camera";
            
            if (errorMsg.includes("Permission") || err.name === "NotAllowedError") {
-             errorMsg = "无法访问相机权限 (Permission denied)。\n\n如果在微信等应用内打开，请点击右上角在【系统浏览器】(Safari/Chrome) 中打开以获取授权。";
+             errorMsg = "无法访问相机权限 (Permission denied)。\n\n1. 这是因为浏览器安全策略限制，在嵌套预览窗口(Iframe)中默认禁止调用相机。\n\n2. 强烈建议点击下方【在新标签页中打开】按钮，或在手机浏览器中打开本款应用以轻松调起并授权您的相机。";
            } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
              errorMsg = "未检测到可用摄像头。请检查设备相机。";
            } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
@@ -76,8 +89,8 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
            }
 
            setError(errorMsg);
-           onError?.(errorMsg);
-        }
+           onErrorRef.current?.(errorMsg);
+         }
       }
     }
 
@@ -105,7 +118,7 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
                 const closedDuration = now - closedStartTimeRef.current;
                 if (closedDuration > 2000 && !isDrowsyRef.current) {
                   isDrowsyRef.current = true;
-                  onDrowsy();
+                  onDrowsyRef.current();
                 }
               }
             } else {
@@ -114,9 +127,9 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
                 
                 if (isDrowsyRef.current) {
                   isDrowsyRef.current = false;
-                  onAwake();
+                  onAwakeRef.current();
                 } else if (closedDuration > 50 && closedDuration < 800) {
-                  onBlink();
+                  onBlinkRef.current();
                 }
                 
                 closedStartTimeRef.current = null;
@@ -143,7 +156,7 @@ export function CameraManager({ onBlink, onDrowsy, onAwake, onReady, onError }: 
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [onBlink, onDrowsy, onAwake]);
+  }, []);
 
   return (
     <div className="fixed top-0 left-0 w-px h-px opacity-0 pointer-events-none select-none z-[-1] overflow-hidden">
