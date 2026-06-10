@@ -139,7 +139,7 @@ export function ActiveMode({
                   <p className={`animate-pulse text-[9px] uppercase tracking-[0.4em] font-black transition-colors duration-1000 ${
                     theme === "midnight" ? "text-[#38BDF8]" : "text-emerald-600/60"
                   }`}>
-                    Double Blink to Release / 快速眨眼两次以释放
+                    Close Eyes for 2s to Save / 闭眼2秒以在心中默念加入收藏夹
                   </p>
                 </div>
               </motion.div>
